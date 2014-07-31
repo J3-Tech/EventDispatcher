@@ -5,12 +5,17 @@ using System.Linq;
 namespace EventDispatcher
 {
     using System.Reflection;
+    using EventDispatcher.Exception;
 
     public class Engine
     {
         private readonly List<ISubscriber> subscribers = new List<ISubscriber>();
 
-        public void AddSubscriberFromNamespace(string nameSpace)
+        /// <summary>
+        /// Adds the subscribers from namespace.
+        /// </summary>
+        /// <param name="nameSpace">The namespace.</param>
+        public void AddSubscribersFromNamespace(string nameSpace)
         {
             var types = GetTypesInNamespace(Assembly.GetCallingAssembly(), nameSpace);
             foreach (var type in types)
@@ -24,21 +29,36 @@ namespace EventDispatcher
             }
         }
 
+        /// <summary>
+        /// Dispatches the specified event name.
+        /// </summary>
+        /// <param name="eventName">Name of the event.</param>
+        /// <param name="evt">The event.</param>
+        /// <exception cref="EventDispatcher.Exception.NoRegisteredEventException"></exception>
         public void Dispatch(string eventName, IEvent evt)
         {
             foreach (var subscriber in subscribers)
             {
-                if (subscriber.GetSubscribedEvents().All(s => s.Key != eventName)) continue;
-                var foo = subscriber.GetSubscribedEvents().First(s => s.Key == eventName);
-                var obj = Activator.CreateInstance(foo.Value);
-                var mInfo = obj.GetType().GetMethod(foo.Key);
-                if (mInfo != null)
+                if (subscriber.GetSubscribedEvents().All(s => s.Key != eventName))
                 {
-                    mInfo.Invoke(obj, new object[] { evt });
+                    throw new NoRegisteredEventException(eventName);
+                }
+                var item = subscriber.GetSubscribedEvents().First(s => s.Key == eventName);
+                var instance = Activator.CreateInstance(item.Value);
+                var methodInfo = instance.GetType().GetMethod(item.Key);
+                if (methodInfo != null)
+                {
+                    methodInfo.Invoke(instance, new object[] {evt});
                 }
             }
         }
 
+        /// <summary>
+        /// Gets the types in namespace.
+        /// </summary>
+        /// <param name="assembly">The assembly.</param>
+        /// <param name="nameSpace">The namespace.</param>
+        /// <returns>IEnumerable{Type}.</returns>
         private static IEnumerable<Type> GetTypesInNamespace(Assembly assembly, string nameSpace)
         {
             return assembly.GetTypes().Where(t => String.Equals(t.Namespace, nameSpace, StringComparison.Ordinal)).ToArray();
