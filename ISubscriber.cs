@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace EventDispatcher
 {
@@ -8,10 +7,6 @@ namespace EventDispatcher
     /// </summary>
     public interface ISubscriber
     {
-        /// <summary>
-        /// Gets the subscribed events.
-        /// </summary>
-        /// <returns>Dictionary{System.StringType}.</returns>
-        Dictionary<string, Type> GetSubscribedEvents();
+        List<SubscribeEvent> GetSubscribedEvents();
     }
 }

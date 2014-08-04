@@ -4,8 +4,8 @@ using System.Linq;
 
 namespace EventDispatcher
 {
-    using System.Reflection;
     using EventDispatcher.Exception;
+    using System.Reflection;
 
     public class Engine
     {
@@ -39,16 +39,20 @@ namespace EventDispatcher
         {
             foreach (var subscriber in subscribers)
             {
-                if (subscriber.GetSubscribedEvents().All(s => s.Key != eventName))
+                if (subscriber.GetSubscribedEvents().All(s => s.Name != eventName))
                 {
                     throw new NoRegisteredEventException(eventName);
                 }
-                var item = subscriber.GetSubscribedEvents().First(s => s.Key == eventName);
-                var instance = Activator.CreateInstance(item.Value);
-                var methodInfo = instance.GetType().GetMethod(item.Key);
+                var item = subscriber.GetSubscribedEvents().OrderBy(s => s.Priority).First(s => s.Name == eventName);
+                var instance = Activator.CreateInstance(subscriber.GetType());
+                var methodInfo = instance.GetType().GetMethod(item.Method);
                 if (methodInfo != null)
                 {
-                    methodInfo.Invoke(instance, new object[] {evt});
+                    methodInfo.Invoke(instance, new object[] { evt });
+                }
+                else
+                {
+                    throw new NoRegisteredEventException(item.Name);
                 }
             }
         }

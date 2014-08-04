@@ -1,5 +1,4 @@
-﻿
-namespace EventDispatcher
+﻿namespace EventDispatcher
 {
     /// <summary>
     /// Interface IEvent

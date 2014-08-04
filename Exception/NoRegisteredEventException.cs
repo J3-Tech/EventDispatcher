@@ -1,12 +1,11 @@
-﻿
-namespace EventDispatcher.Exception
+﻿namespace EventDispatcher.Exception
 {
     using System;
 
     /// <summary>
     /// Class NoRegisteredEventException
     /// </summary>
-    class NoRegisteredEventException:Exception
+    internal class NoRegisteredEventException : Exception
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="NoRegisteredEventException"/> class.
